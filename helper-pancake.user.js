@@ -4,8 +4,8 @@
 // @version      4.5
 // @description  Helper Pricing, Sensor, Forward ke Telegram, Twibbon Gadget & Motor, qris dinamis
 // @author       You
-// @updateURL    https://gist.githubusercontent.com/barkas-dev/535c952530cabb0575d0032ee279f25b/raw/helper-pancake.user.js
-// @downloadURL  https://gist.githubusercontent.com/barkas-dev/535c952530cabb0575d0032ee279f25b/raw/helper-pancake.user.js
+// @updateURL    https://gist.githubusercontent.com/AMALIYNM/fffb6dc678e5298c6b76aaa2057de4bf/raw/helper-pancake.user.js
+// @downloadURL  https://gist.githubusercontent.com/AMALIYNM/fffb6dc678e5298c6b76aaa2057de4bf/raw/helper-pancake.user.js
 // @match        *://*.pancake.id/*
 // @match        *://pancake.id/*
 // @grant        GM_xmlhttpRequest
