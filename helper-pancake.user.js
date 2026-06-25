@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Helper Pancake
 // @namespace    http://tampermonkey.net/
-// @version      4.5
+// @version      4.6
 // @description  Helper Pricing, Sensor, Forward ke Telegram, Twibbon Gadget & Motor, qris dinamis
 // @author       You
 // @updateURL    https://gist.githubusercontent.com/AMALIYNM/fffb6dc678e5298c6b76aaa2057de4bf/raw/helper-pancake.user.js
@@ -382,6 +382,27 @@ const QRIS_AKUN_IG = [
      * Foto produk digambar di: x=110,y=150,w=856,h=836 (cover fit)
      * Teks: judul x=130,y=1085 bold 52px | harga x=130,y=1195 bold 88px
      */
+    // Pecah teks jadi maks 2 baris agar muat dalam maxWidth
+    function wrapTextCanvas(ctx, text, maxWidth) {
+        if (ctx.measureText(text).width <= maxWidth) return [text];
+        const words = text.split(' ');
+        let line1 = '', line2 = '';
+        for (let i = 0; i < words.length; i++) {
+            const test = line1 ? line1 + ' ' + words[i] : words[i];
+            if (ctx.measureText(test).width <= maxWidth) {
+                line1 = test;
+            } else {
+                line2 = words.slice(i).join(' ');
+                break;
+            }
+        }
+        // Kalau baris 2 masih terlalu panjang, potong dengan ellipsis
+        while (line2 && ctx.measureText(line2).width > maxWidth) {
+            line2 = line2.slice(0, -2).trimEnd() + '…';
+        }
+        return line2 ? [line1, line2] : [line1];
+    }
+
     function renderTwibbon(frameB64, judulProduk, hargaProduk) {
         return new Promise((resolve) => {
             if (!twibbonImageSrc) { resolve(null); return; }
@@ -434,12 +455,19 @@ const QRIS_AKUN_IG = [
 
                     let titleSize = 52;
                     ctx.font = `bold ${titleSize}px sans-serif`;
-                    while (ctx.measureText(judulProduk).width > 720 && titleSize > 28) {
-                        titleSize -= 2;
+                    while (ctx.measureText(judulProduk).width > 820 && titleSize > 18) {
+                        titleSize -= 1;
                         ctx.font = `bold ${titleSize}px sans-serif`;
                     }
                     ctx.fillStyle = '#1A1A1A';
-                    ctx.fillText(judulProduk, 130, 1085);
+                    // Word wrap: pecah jadi 2 baris jika masih melebihi area
+                    const titleLines = wrapTextCanvas(ctx, judulProduk, 820);
+                    if (titleLines.length === 1) {
+                        ctx.fillText(titleLines[0], 130, 1085);
+                    } else {
+                        ctx.fillText(titleLines[0], 130, 1060);
+                        ctx.fillText(titleLines[1], 130, 1060 + titleSize * 1.2);
+                    }
 
                     const hargaText = 'Rp' + fmtRupiah(hargaProduk);
                     let priceSize = 88;
@@ -1092,12 +1120,18 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
                 if (judul) {
                     let ts = Math.round(52 * ratio);
                     ctx.font = `bold ${ts}px sans-serif`;
-                    while (ctx.measureText(judul).width > 720 * ratio && ts > 20) {
+                    while (ctx.measureText(judul).width > 820 * ratio && ts > 18) {
                         ts -= 1;
                         ctx.font = `bold ${ts}px sans-serif`;
                     }
                     ctx.fillStyle = '#1A1A1A';
-                    ctx.fillText(judul, 130 * ratio, 1085 * ratio);
+                    const tLines = wrapTextCanvas(ctx, judul, 820 * ratio);
+                    if (tLines.length === 1) {
+                        ctx.fillText(tLines[0], 130 * ratio, 1085 * ratio);
+                    } else {
+                        ctx.fillText(tLines[0], 130 * ratio, 1060 * ratio);
+                        ctx.fillText(tLines[1], 130 * ratio, (1060 + ts * 1.2) * ratio);
+                    }
                 }
 
                 if (harga) {
