@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Helper Pancake
 // @namespace    http://tampermonkey.net/
-// @version      4.6
+// @version      4.7
 // @description  Helper Pricing, Sensor, Forward ke Telegram, Twibbon Gadget & Motor, qris dinamis
 // @author       You
 // @updateURL    https://gist.githubusercontent.com/AMALIYNM/fffb6dc678e5298c6b76aaa2057de4bf/raw/helper-pancake.user.js
@@ -719,6 +719,67 @@ const QRIS_AKUN_IG = [
             </div>
             <!-- ===== END TWIBBON ===== -->
 
+            <!-- ===== SECTION TWIBBON INFOKOS ===== -->
+            <div style="margin-bottom:12px; border:2px solid #F5A623; border-radius:8px; overflow:hidden;">
+                <div id="tab-infokos" style="background:#FFF8E1; padding:10px; cursor:pointer; font-weight:bold; font-size:11px; display:flex; justify-content:space-between; align-items:center;">
+                    <span>🏠 TWIBBON INFOKOS</span>
+                    <span id="arrow-infokos">▼</span>
+                </div>
+                <div id="konten-infokos" style="display:none; padding:10px; background:#fff;">
+                    <div style="background:#FFF8E1; border:1px solid #FFE082; border-radius:6px; padding:8px; margin-bottom:8px; font-size:10px; color:#F57F17; line-height:1.5;">
+                        💡 Arahkan kursor ke <b>foto properti</b> di chat → tekan <b>Shift+X</b>
+                    </div>
+                    <div id="infokos-pick-status" style="font-size:11px; color:#E65100; margin-bottom:8px; min-height:16px; font-weight:bold;"></div>
+
+                    <!-- Canvas editor -->
+                    <div style="position:relative; width:100%; background:#f0f0f0; border-radius:8px; border:2px dashed #FFB300; overflow:hidden; margin-bottom:10px;" id="infokos-editor-wrap">
+                        <canvas id="infokos-editor-canvas" style="width:100%; display:block; cursor:grab; touch-action:none;"></canvas>
+                        <div style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.45);color:white;font-size:9px;padding:3px 6px;border-radius:4px;pointer-events:none;">Drag foto · Scroll zoom</div>
+                    </div>
+
+                    <!-- Zoom -->
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                        <span style="font-size:10px; color:#555; white-space:nowrap;">🔍 Zoom</span>
+                        <input id="infokos-zoom-slider" type="range" min="50" max="300" value="100" step="1" style="flex:1; cursor:pointer;" />
+                        <span id="infokos-zoom-label" style="font-size:10px; color:#E65100; width:34px; text-align:right;">100%</span>
+                        <button id="btn-infokos-reset" style="font-size:10px; background:#eee; border:1px solid #ccc; border-radius:4px; padding:3px 7px; cursor:pointer;">Reset</button>
+                    </div>
+
+                    <!-- Hidden transform inputs -->
+                    <input type="hidden" id="infokos-img-scale"  value="1" />
+                    <input type="hidden" id="infokos-img-ox"     value="0" />
+                    <input type="hidden" id="infokos-img-oy"     value="0" />
+                    <input type="hidden" id="infokos-img-rotate" value="0" />
+
+                    <!-- Rotate -->
+                    <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px;">
+                        <span style="font-size:10px; color:#555; white-space:nowrap;">🔄 Rotate</span>
+                        <button id="btn-infokos-rot-ccw" style="font-size:13px; background:#eee; border:1px solid #ccc; border-radius:4px; padding:2px 8px; cursor:pointer;" title="Putar kiri 90°">↺</button>
+                        <span id="infokos-rotate-label" style="font-size:10px; color:#E65100; width:34px; text-align:center;">0°</span>
+                        <button id="btn-infokos-rot-cw"  style="font-size:13px; background:#eee; border:1px solid #ccc; border-radius:4px; padding:2px 8px; cursor:pointer;" title="Putar kanan 90°">↻</button>
+                    </div>
+
+                    <label style="font-size:10px; font-weight:bold; color:#E65100; display:block; margin-bottom:3px;">🏷️ Nama Properti</label>
+                    <input id="infokos-judul" type="text" placeholder="cth: Kos Putri Sakinah" style="width:100%; font-size:11px; padding:6px 8px; border:1px solid #FFB300; border-radius:6px; box-sizing:border-box; outline:none; margin-bottom:8px; cursor:text;" />
+
+                    <label style="font-size:10px; font-weight:bold; color:#E65100; display:block; margin-bottom:3px;">📍 Lokasi</label>
+                    <input id="infokos-lokasi" type="text" placeholder="cth: Pogung, Mlati, Sleman" style="width:100%; font-size:11px; padding:6px 8px; border:1px solid #FFB300; border-radius:6px; box-sizing:border-box; outline:none; margin-bottom:8px; cursor:text;" />
+
+                    <label style="font-size:10px; font-weight:bold; color:#E65100; display:block; margin-bottom:3px;">💰 Harga (angka)</label>
+                    <div style="display:flex; gap:6px; margin-bottom:10px;">
+                        <input id="infokos-harga" type="number" placeholder="cth: 700000" style="flex:1; font-size:11px; padding:6px 8px; border:1px solid #FFB300; border-radius:6px; box-sizing:border-box; outline:none; cursor:text;" />
+                        <select id="infokos-periode" style="font-size:11px; padding:6px 8px; border:1px solid #FFB300; border-radius:6px; outline:none; cursor:pointer; background:#fff;">
+                            <option value="/bulan">/bulan</option>
+                            <option value="/tahun">/tahun</option>
+                        </select>
+                    </div>
+
+                    <button id="btn-infokos-kirim" style="width:100%; background:#F5A623; color:#1A1A1A; border:none; padding:11px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:13px; margin-bottom:4px;">📤 Kirim Twibbon Infokos</button>
+                    <div id="infokos-status" style="margin-top:8px; font-size:11px; color:#555; text-align:center; min-height:18px;"></div>
+                </div>
+            </div>
+            <!-- ===== END TWIBBON INFOKOS ===== -->
+
             <div style="display:flex; gap:8px; margin-bottom:8px;">
                 <button id="btn-fee-iklan"     style="flex:1; background:#FFC107; color:#333; border:none; padding:11px 6px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:12px;">📢 Fee Iklan</button>
                 <button id="btn-proses-sensor" style="flex:1; background:#00BCD4; color:white; border:none; padding:11px 6px; border-radius:8px; cursor:pointer; font-weight:bold; font-size:12px;">✉️ Forward &amp; Sensor</button>
@@ -761,6 +822,14 @@ const QRIS_AKUN_IG = [
         const isOpen = el.style.display === 'block';
         el.style.display = isOpen ? 'none' : 'block';
         document.getElementById('arrow-twibbon').innerText = isOpen ? '▼' : '▲';
+    });
+
+    document.getElementById('tab-infokos').addEventListener('click', () => {
+        const el     = document.getElementById('konten-infokos');
+        const isOpen = el.style.display === 'block';
+        el.style.display = isOpen ? 'none' : 'block';
+        document.getElementById('arrow-infokos').innerText = isOpen ? '▼' : '▲';
+        if (!isOpen) drawEditorCanvasInfokos();
     });
 
     /* ===================== FIX TOMBOL ? BASKET ===================== */
@@ -1238,6 +1307,421 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
 
     document.getElementById('twibbon-judul').addEventListener('input', tryAutoPreviewTwibbon);
     document.getElementById('twibbon-harga').addEventListener('input', tryAutoPreviewTwibbon);
+
+ /* ===================== TWIBBON INFOKOS ===================== */
+
+    let twibbonInfokosState = { scale: 1, ox: 0, oy: 0, rotate: 0 };
+
+    function syncInfokosInputs() {
+        document.getElementById('infokos-img-scale').value  = twibbonInfokosState.scale;
+        document.getElementById('infokos-img-ox').value     = twibbonInfokosState.ox;
+        document.getElementById('infokos-img-oy').value     = twibbonInfokosState.oy;
+        document.getElementById('infokos-img-rotate').value = twibbonInfokosState.rotate;
+        const slider = document.getElementById('infokos-zoom-slider');
+        const label  = document.getElementById('infokos-zoom-label');
+        if (slider) slider.value = Math.round(twibbonInfokosState.scale * 100);
+        if (label)  label.innerText = Math.round(twibbonInfokosState.scale * 100) + '%';
+        const rotLabel = document.getElementById('infokos-rotate-label');
+        if (rotLabel) rotLabel.innerText = twibbonInfokosState.rotate + '°';
+    }
+
+    function drawInfokosFrameOnCanvas(ctx, W, H, ratio) {
+        const PX = 95*ratio, PY = 108*ratio, PW = 890*ratio, PH = 835*ratio;
+        const DARK_Y = PY + PH;
+
+        // Header bar (semi-dark overlay di atas foto)
+        ctx.save();
+        ctx.fillStyle = 'rgba(20,12,0,0.55)';
+        ctx.fillRect(0, 0, W, PY);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = `bold ${Math.round(38*ratio)}px sans-serif`;
+        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
+        ctx.fillText('BARKASJOGJA.YK', 62*ratio, 54*ratio);
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2*ratio;
+        ctx.beginPath(); ctx.moveTo(545*ratio, 54*ratio); ctx.lineTo(740*ratio, 54*ratio); ctx.stroke();
+        ctx.textAlign = 'right';
+        ctx.fillText('PROPERTY', W - 50*ratio, 54*ratio);
+        ctx.restore();
+
+        // Dark bottom section
+        ctx.fillStyle = '#2D2D2D';
+        ctx.fillRect(0, DARK_Y, W, H - DARK_Y);
+
+        // White card for text
+        const CARD_X=25*ratio, CARD_Y=DARK_Y+10*ratio, CARD_W=750*ratio, CARD_H=190*ratio, CR=14*ratio;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(CARD_X+CR, CARD_Y); ctx.lineTo(CARD_X+CARD_W-CR, CARD_Y);
+        ctx.quadraticCurveTo(CARD_X+CARD_W, CARD_Y, CARD_X+CARD_W, CARD_Y+CR);
+        ctx.lineTo(CARD_X+CARD_W, CARD_Y+CARD_H-CR);
+        ctx.quadraticCurveTo(CARD_X+CARD_W, CARD_Y+CARD_H, CARD_X+CARD_W-CR, CARD_Y+CARD_H);
+        ctx.lineTo(CARD_X+CR, CARD_Y+CARD_H);
+        ctx.quadraticCurveTo(CARD_X, CARD_Y+CARD_H, CARD_X, CARD_Y+CARD_H-CR);
+        ctx.lineTo(CARD_X, CARD_Y+CR);
+        ctx.quadraticCurveTo(CARD_X, CARD_Y, CARD_X+CR, CARD_Y);
+        ctx.closePath(); ctx.fillStyle = '#FFFFFF'; ctx.fill();
+        ctx.restore();
+
+        // Tombol kanan (Swipe Left + INFOKOS JOGJAYK)
+        function drawBtn(bx, by, bw, bh, br, line1, line2) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(bx+br,by); ctx.lineTo(bx+bw-br,by); ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+br);
+            ctx.lineTo(bx+bw,by+bh-br); ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-br,by+bh);
+            ctx.lineTo(bx+br,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-br);
+            ctx.lineTo(bx,by+br); ctx.quadraticCurveTo(bx,by,bx+br,by);
+            ctx.closePath(); ctx.fillStyle = '#F5A623'; ctx.fill();
+            ctx.fillStyle = '#1A1A1A'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            const fs1 = Math.round(22*ratio);
+            if (line2) {
+                ctx.font = `bold ${fs1}px sans-serif`; ctx.fillText(line1, bx+bw/2, by+bh/2-12*ratio);
+                ctx.font = `bold ${Math.round(18*ratio)}px sans-serif`; ctx.fillText(line2, bx+bw/2, by+bh/2+12*ratio);
+            } else {
+                ctx.font = `bold ${fs1}px sans-serif`; ctx.fillText(line1, bx+bw/2, by+bh/2);
+            }
+            ctx.restore();
+        }
+        const BTN_X=800*ratio, BTN_W=255*ratio, BTN_H=88*ratio, BTN_R=12*ratio;
+        drawBtn(BTN_X, DARK_Y+8*ratio,  BTN_W, BTN_H, BTN_R, '<< Swipe Left');
+        drawBtn(BTN_X, DARK_Y+106*ratio, BTN_W, BTN_H, BTN_R, '🏠 INFOKOS', 'JOGJAYK');
+
+        // Footer
+        const FOOTER_Y = DARK_Y + 208*ratio;
+        ctx.fillStyle = '#F5A623';
+        ctx.fillRect(0, FOOTER_Y, W, H - FOOTER_Y);
+        ctx.fillStyle = '#1A1A1A';
+        ctx.font = `${Math.round(22*ratio)}px sans-serif`;
+        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText('📱 085172115232   📷 @barkasjogja.yk   📷 @infokosjogja.yk', 35*ratio, FOOTER_Y + (H - FOOTER_Y)/2);
+
+        // Preview teks di white card
+        const judul   = document.getElementById('infokos-judul')?.value || '';
+        const lokasi  = document.getElementById('infokos-lokasi')?.value || '';
+        const harga   = parseInt(document.getElementById('infokos-harga')?.value) || 0;
+        const periode = document.getElementById('infokos-periode')?.value || '/bulan';
+        const TX = 50*ratio;
+
+        ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+
+        if (judul) {
+            let ts = Math.round(55*ratio);
+            ctx.font = `bold ${ts}px sans-serif`;
+            while (ctx.measureText(judul).width > 700*ratio && ts > 16) { ts--; ctx.font = `bold ${ts}px sans-serif`; }
+            ctx.fillStyle = '#1A1A1A';
+            ctx.fillText(judul, TX, CARD_Y + 55*ratio);
+        }
+        if (lokasi) {
+            ctx.font = `${Math.round(36*ratio)}px sans-serif`;
+            ctx.fillStyle = '#444444';
+            ctx.fillText('📍 ' + lokasi, TX, CARD_Y + 108*ratio);
+        }
+        if (harga) {
+            const hStr = 'Rp' + fmtRupiah(harga);
+            let hs = Math.round(68*ratio);
+            ctx.font = `bold ${hs}px sans-serif`;
+            while (ctx.measureText(hStr).width > 590*ratio && hs > 22) { hs--; ctx.font = `bold ${hs}px sans-serif`; }
+            ctx.fillStyle = '#1A1A1A';
+            ctx.fillText(hStr, TX, CARD_Y + 173*ratio);
+            const hW = ctx.measureText(hStr).width;
+            ctx.font = `${Math.round(30*ratio)}px sans-serif`;
+            ctx.fillStyle = '#555555';
+            ctx.fillText(periode, TX + hW + 7*ratio, CARD_Y + 165*ratio);
+        }
+    }
+
+    function drawEditorCanvasInfokos() {
+        const canvas = document.getElementById('infokos-editor-canvas');
+        if (!canvas) return;
+        const dispW = canvas.parentElement.clientWidth || 300;
+        const dispH = Math.round(dispW * 1350 / 1080);
+        canvas.width = dispW; canvas.height = dispH;
+        canvas.style.height = dispH + 'px';
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, dispW, dispH);
+        const ratio = dispW / 1080;
+        const PX=95*ratio, PY=108*ratio, PW=890*ratio, PH=835*ratio;
+
+        // Background orange
+        const bg = ctx.createLinearGradient(0, 0, dispW, dispH);
+        bg.addColorStop(0, '#F5A623'); bg.addColorStop(1, '#C0460A');
+        ctx.fillStyle = bg; ctx.fillRect(0, 0, dispW, dispH);
+
+        if (twibbonImageSrc) {
+            const prodImg = new Image();
+            prodImg.onload = () => {
+                const baseScale = Math.max(PW/prodImg.naturalWidth, PH/prodImg.naturalHeight) * twibbonInfokosState.scale;
+                const dw = prodImg.naturalWidth * baseScale, dh = prodImg.naturalHeight * baseScale;
+                const dx = PX + (PW-dw)/2 + twibbonInfokosState.ox*ratio;
+                const dy = PY + (PH-dh)/2 + twibbonInfokosState.oy*ratio;
+                const cx = PX + PW/2 + twibbonInfokosState.ox*ratio;
+                const cy = PY + PH/2 + twibbonInfokosState.oy*ratio;
+                ctx.save();
+                ctx.beginPath(); ctx.rect(PX, PY, PW, PH); ctx.clip();
+                ctx.fillStyle = '#EEEEEE'; ctx.fillRect(PX, PY, PW, PH);
+                ctx.translate(cx, cy);
+                ctx.rotate(twibbonInfokosState.rotate * Math.PI / 180);
+                ctx.translate(-cx, -cy);
+                ctx.drawImage(prodImg, dx, dy, dw, dh);
+                ctx.restore();
+                drawInfokosFrameOnCanvas(ctx, dispW, dispH, ratio);
+            };
+            prodImg.src = twibbonImageSrc;
+        } else {
+            ctx.fillStyle = '#e0e0e0'; ctx.fillRect(PX, PY, PW, PH);
+            ctx.fillStyle = '#999'; ctx.font = `${Math.round(12*ratio)}px sans-serif`;
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('Foto properti muncul di sini', PX+PW/2, PY+PH/2);
+            drawInfokosFrameOnCanvas(ctx, dispW, dispH, ratio);
+        }
+    }
+
+    function renderTwibbonInfokos(judul, lokasi, harga, periode) {
+        return new Promise((resolve) => {
+            if (!twibbonImageSrc) { resolve(null); return; }
+            const W=1080, H=1350;
+            const canvas = document.createElement('canvas');
+            canvas.width = W; canvas.height = H;
+            const ctx = canvas.getContext('2d');
+            const PX=95, PY=108, PW=890, PH=835;
+
+            // Background
+            const bg = ctx.createLinearGradient(0, 0, W, H);
+            bg.addColorStop(0, '#F5A623'); bg.addColorStop(1, '#C0460A');
+            ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+            const scaleVal  = parseFloat(document.getElementById('infokos-img-scale')?.value  || 1);
+            const offsetX   = parseFloat(document.getElementById('infokos-img-ox')?.value     || 0);
+            const offsetY   = parseFloat(document.getElementById('infokos-img-oy')?.value     || 0);
+            const rotateDeg = parseFloat(document.getElementById('infokos-img-rotate')?.value || 0);
+
+            const prodImg = new Image();
+            prodImg.onload = () => {
+                const baseScale = Math.max(PW/prodImg.naturalWidth, PH/prodImg.naturalHeight) * scaleVal;
+                const dw=prodImg.naturalWidth*baseScale, dh=prodImg.naturalHeight*baseScale;
+                const dx=PX+(PW-dw)/2+offsetX, dy=PY+(PH-dh)/2+offsetY;
+                const cx=PX+PW/2+offsetX,      cy=PY+PH/2+offsetY;
+
+                ctx.save();
+                ctx.beginPath(); ctx.rect(PX, PY, PW, PH); ctx.clip();
+                ctx.fillStyle = '#EEEEEE'; ctx.fillRect(PX, PY, PW, PH);
+                ctx.translate(cx, cy); ctx.rotate(rotateDeg*Math.PI/180); ctx.translate(-cx, -cy);
+                ctx.drawImage(prodImg, dx, dy, dw, dh);
+                ctx.restore();
+
+                // Frame overlay (1:1 scale, ratio=1)
+                const DARK_Y = PY + PH; // 943
+
+                // Header
+                ctx.save();
+                ctx.fillStyle = 'rgba(20,12,0,0.55)';
+                ctx.fillRect(0, 0, W, PY);
+                ctx.fillStyle = '#FFFFFF';
+                ctx.font = 'bold 42px sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+                ctx.fillText('BARKASJOGJA.YK', 62, 54);
+                ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.moveTo(565, 54); ctx.lineTo(770, 54); ctx.stroke();
+                ctx.textAlign = 'right'; ctx.fillText('PROPERTY', W-55, 54);
+                ctx.restore();
+
+                // Dark bottom
+                ctx.fillStyle = '#2D2D2D'; ctx.fillRect(0, DARK_Y, W, H-DARK_Y);
+
+                // White card
+                const CARD_X=25, CARD_Y=DARK_Y+10, CARD_W=750, CARD_H=190, CR=14;
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(CARD_X+CR,CARD_Y); ctx.lineTo(CARD_X+CARD_W-CR,CARD_Y);
+                ctx.quadraticCurveTo(CARD_X+CARD_W,CARD_Y,CARD_X+CARD_W,CARD_Y+CR);
+                ctx.lineTo(CARD_X+CARD_W,CARD_Y+CARD_H-CR);
+                ctx.quadraticCurveTo(CARD_X+CARD_W,CARD_Y+CARD_H,CARD_X+CARD_W-CR,CARD_Y+CARD_H);
+                ctx.lineTo(CARD_X+CR,CARD_Y+CARD_H);
+                ctx.quadraticCurveTo(CARD_X,CARD_Y+CARD_H,CARD_X,CARD_Y+CARD_H-CR);
+                ctx.lineTo(CARD_X,CARD_Y+CR);
+                ctx.quadraticCurveTo(CARD_X,CARD_Y,CARD_X+CR,CARD_Y);
+                ctx.closePath(); ctx.fillStyle='#FFFFFF'; ctx.fill();
+                ctx.restore();
+
+                // Tombol kanan
+                function drawBtnFull(bx, by, bw, bh, br, line1, line2) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(bx+br,by); ctx.lineTo(bx+bw-br,by); ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+br);
+                    ctx.lineTo(bx+bw,by+bh-br); ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-br,by+bh);
+                    ctx.lineTo(bx+br,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-br);
+                    ctx.lineTo(bx,by+br); ctx.quadraticCurveTo(bx,by,bx+br,by);
+                    ctx.closePath(); ctx.fillStyle='#F5A623'; ctx.fill();
+                    ctx.fillStyle='#1A1A1A'; ctx.textAlign='center'; ctx.textBaseline='middle';
+                    if (line2) {
+                        ctx.font='bold 26px sans-serif'; ctx.fillText(line1, bx+bw/2, by+bh/2-14);
+                        ctx.font='bold 22px sans-serif'; ctx.fillText(line2, bx+bw/2, by+bh/2+14);
+                    } else {
+                        ctx.font='bold 26px sans-serif'; ctx.fillText(line1, bx+bw/2, by+bh/2);
+                    }
+                    ctx.restore();
+                }
+                drawBtnFull(800, DARK_Y+8,  255, 88, 12, '<< Swipe Left');
+                drawBtnFull(800, DARK_Y+106, 255, 88, 12, '🏠 INFOKOS', 'JOGJAYK');
+
+                // Footer
+                const FOOTER_Y = DARK_Y + 208;
+                ctx.fillStyle = '#F5A623'; ctx.fillRect(0, FOOTER_Y, W, H-FOOTER_Y);
+                ctx.fillStyle = '#1A1A1A'; ctx.font = '26px sans-serif';
+                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+                ctx.fillText('📱 085172115232   📷 @barkasjogja.yk   📷 @infokosjogja.yk', 40, FOOTER_Y+(H-FOOTER_Y)/2);
+
+                // Teks di white card
+                const TX = 55;
+                ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+
+                if (judul) {
+                    let ts = 58;
+                    ctx.font = `bold ${ts}px sans-serif`;
+                    while (ctx.measureText(judul).width > 700 && ts > 16) { ts--; ctx.font = `bold ${ts}px sans-serif`; }
+                    ctx.fillStyle = '#1A1A1A'; ctx.fillText(judul, TX, CARD_Y+58);
+                }
+                if (lokasi) {
+                    ctx.font = '38px sans-serif'; ctx.fillStyle = '#444444';
+                    ctx.fillText('📍 ' + lokasi, TX, CARD_Y+110);
+                }
+                if (harga) {
+                    const hStr = 'Rp' + fmtRupiah(harga);
+                    let hs = 72;
+                    ctx.font = `bold ${hs}px sans-serif`;
+                    while (ctx.measureText(hStr).width > 590 && hs > 28) { hs--; ctx.font = `bold ${hs}px sans-serif`; }
+                    ctx.fillStyle = '#1A1A1A'; ctx.fillText(hStr, TX, CARD_Y+175);
+                    const hW = ctx.measureText(hStr).width;
+                    ctx.font = '34px sans-serif'; ctx.fillStyle = '#555555';
+                    ctx.fillText(periode, TX+hW+8, CARD_Y+167);
+                }
+
+                canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
+            };
+            prodImg.onerror = () => resolve(null);
+            prodImg.src = twibbonImageSrc;
+        });
+    }
+
+    async function kirimTwibbonInfokos() {
+        const judul   = document.getElementById('infokos-judul').value.trim();
+        const lokasi  = document.getElementById('infokos-lokasi').value.trim();
+        const harga   = parseInt(document.getElementById('infokos-harga').value) || 0;
+        const periode = document.getElementById('infokos-periode').value;
+        const statusEl = document.getElementById('infokos-status');
+
+        if (!twibbonImageSrc) { statusEl.innerText = '⚠️ Belum ada foto! Arahkan ke foto lalu Shift+X.'; return; }
+        if (!judul)           { statusEl.innerText = '⚠️ Nama properti belum diisi!'; return; }
+
+        statusEl.innerText = '🔄 Membuat Twibbon Infokos...';
+        try {
+            const blob = await renderTwibbonInfokos(judul, lokasi, harga, periode);
+            if (!blob) { statusEl.innerText = '❌ Gagal render. Coba Shift+X ulang.'; return; }
+
+            drawEditorCanvasInfokos();
+            statusEl.innerText = '📤 Mengirim ke Telegram...';
+
+            const formData = new FormData();
+            formData.append('chat_id', CHAT_ID);
+            formData.append('photo', blob, 'infokos.jpg');
+            formData.append('caption', `${judul}${lokasi ? '\n📍 ' + lokasi : ''}\nRp${fmtRupiah(harga)} ${periode}`);
+
+            const res  = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+            const json = await res.json();
+            if (json.ok) {
+                statusEl.innerHTML = '✅ Twibbon Infokos berhasil terkirim!';
+            } else {
+                statusEl.innerText = `❌ Gagal: ${json.description || 'unknown error'}`;
+            }
+        } catch (err) {
+            statusEl.innerText = '❌ Error: ' + err.message;
+        }
+    }
+
+    // Drag & zoom canvas Infokos
+    (function setupInfokosEditorDrag() {
+        let isDragging = false, lastX = 0, lastY = 0;
+        function getCanvas() { return document.getElementById('infokos-editor-canvas'); }
+
+        document.addEventListener('mousedown', (e) => {
+            if (e.target !== getCanvas()) return;
+            isDragging = true; lastX = e.clientX; lastY = e.clientY; e.preventDefault();
+        });
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const c = getCanvas(); if (!c) return;
+            const ratio = 1080 / (c.parentElement.clientWidth || 300);
+            twibbonInfokosState.ox += (e.clientX - lastX) * ratio;
+            twibbonInfokosState.oy += (e.clientY - lastY) * ratio;
+            lastX = e.clientX; lastY = e.clientY;
+            syncInfokosInputs(); drawEditorCanvasInfokos();
+        });
+        document.addEventListener('mouseup', () => { isDragging = false; });
+
+        document.addEventListener('touchstart', (e) => {
+            if (e.target !== getCanvas()) return;
+            isDragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+        }, { passive: true });
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const c = getCanvas(); if (!c) return;
+            const ratio = 1080 / (c.parentElement.clientWidth || 300);
+            twibbonInfokosState.ox += (e.touches[0].clientX - lastX) * ratio;
+            twibbonInfokosState.oy += (e.touches[0].clientY - lastY) * ratio;
+            lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+            syncInfokosInputs(); drawEditorCanvasInfokos();
+        }, { passive: true });
+        document.addEventListener('touchend', () => { isDragging = false; });
+
+        document.addEventListener('wheel', (e) => {
+            if (e.target !== getCanvas()) return;
+            e.preventDefault();
+            twibbonInfokosState.scale = Math.max(0.3, Math.min(5, twibbonInfokosState.scale + (e.deltaY < 0 ? 0.05 : -0.05)));
+            syncInfokosInputs(); drawEditorCanvasInfokos();
+        }, { passive: false });
+    })();
+
+    // Zoom slider Infokos
+    document.getElementById('infokos-zoom-slider').addEventListener('input', function () {
+        twibbonInfokosState.scale = parseInt(this.value) / 100;
+        syncInfokosInputs(); drawEditorCanvasInfokos();
+    });
+
+    // Reset Infokos
+    document.getElementById('btn-infokos-reset').addEventListener('click', () => {
+        twibbonInfokosState = { scale: 1, ox: 0, oy: 0, rotate: 0 };
+        syncInfokosInputs(); drawEditorCanvasInfokos();
+    });
+
+    // Rotate Infokos
+    document.getElementById('btn-infokos-rot-ccw').addEventListener('click', () => {
+        twibbonInfokosState.rotate = (twibbonInfokosState.rotate - 90 + 360) % 360;
+        syncInfokosInputs(); drawEditorCanvasInfokos();
+    });
+    document.getElementById('btn-infokos-rot-cw').addEventListener('click', () => {
+        twibbonInfokosState.rotate = (twibbonInfokosState.rotate + 90) % 360;
+        syncInfokosInputs(); drawEditorCanvasInfokos();
+    });
+
+    // Kirim Infokos
+    document.getElementById('btn-infokos-kirim').addEventListener('click', kirimTwibbonInfokos);
+
+    // Auto preview saat input berubah
+    ['infokos-judul','infokos-lokasi','infokos-harga','infokos-periode'].forEach(id => {
+        document.getElementById(id).addEventListener('input', drawEditorCanvasInfokos);
+    });
+
+    // Refresh canvas infokos saat foto dipilih
+    const _origSetTwibbonPickStatus = setTwibbonPickStatus;
+    setTwibbonPickStatus = function(msg) {
+        _origSetTwibbonPickStatus(msg);
+        if (document.getElementById('konten-infokos')?.style.display === 'block') {
+            twibbonInfokosState = { scale: 1, ox: 0, oy: 0, rotate: 0 };
+            syncInfokosInputs();
+            drawEditorCanvasInfokos();
+            document.getElementById('infokos-pick-status').innerText = msg;
+        }
+    };
 
  /* ===================== UPDATE KAMUS ===================== */
 
