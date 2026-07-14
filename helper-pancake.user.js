@@ -1325,46 +1325,83 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
         if (rotLabel) rotLabel.innerText = twibbonInfokosState.rotate + '°';
     }
 
-    function drawInfokosFrameOnCanvas(ctx, W, H, ratio) {
-        const PX = 95*ratio, PY = 108*ratio, PW = 890*ratio, PH = 835*ratio;
-        const DARK_Y = PY + PH;
-
-        // Header bar (semi-dark overlay di atas foto)
+    function _drawInfokosHexPattern(ctx, W, H, ratio) {
+        const r = 30*ratio, hexH = Math.sqrt(3)*r, hexW = r*2;
         ctx.save();
-        ctx.fillStyle = 'rgba(20,12,0,0.55)';
-        ctx.fillRect(0, 0, W, PY);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = `bold ${Math.round(38*ratio)}px sans-serif`;
-        ctx.textBaseline = 'middle';
-        ctx.textAlign = 'left';
-        ctx.fillText('BARKASJOGJA.YK', 62*ratio, 54*ratio);
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = 2*ratio;
-        ctx.beginPath(); ctx.moveTo(545*ratio, 54*ratio); ctx.lineTo(740*ratio, 54*ratio); ctx.stroke();
-        ctx.textAlign = 'right';
-        ctx.fillText('PROPERTY', W - 50*ratio, 54*ratio);
+        ctx.strokeStyle = 'rgba(0,0,0,0.14)';
+        ctx.lineWidth = 1.5*ratio;
+        for (let row = -1; row * hexH < H + hexH; row++) {
+            for (let col = -1; col * hexW * 0.75 < W + hexW; col++) {
+                const cx2 = col * hexW * 0.75;
+                const cy2 = row * hexH + (col % 2 === 0 ? 0 : hexH/2);
+                ctx.beginPath();
+                for (let i = 0; i < 6; i++) {
+                    const a = Math.PI/180*(60*i - 30);
+                    const px2 = cx2 + r*Math.cos(a), py2 = cy2 + r*Math.sin(a);
+                    i === 0 ? ctx.moveTo(px2, py2) : ctx.lineTo(px2, py2);
+                }
+                ctx.closePath(); ctx.stroke();
+            }
+        }
+        ctx.restore();
+    }
+
+    function drawInfokosFrameOnCanvas(ctx, W, H, ratio) {
+        const DARK_Y  = (108 + 835) * ratio; // 943*ratio
+        const FOOTER_Y = DARK_Y + 268*ratio;
+
+        // Tugu Jogja silhouette
+        (function(tx, ty, tw, th) {
+            const cx2 = tx + tw/2;
+            ctx.save(); ctx.fillStyle = '#1A1A1A';
+            ctx.beginPath(); ctx.moveTo(cx2, ty); ctx.lineTo(cx2-tw*0.07,ty+th*0.08); ctx.lineTo(cx2+tw*0.07,ty+th*0.08); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx2, ty+th*0.16, tw*0.14, 0, Math.PI*2); ctx.fill();
+            ctx.fillRect(cx2-tw*0.09, ty+th*0.24, tw*0.18, th*0.26);
+            ctx.fillRect(cx2-tw*0.20, ty+th*0.50, tw*0.40, th*0.05);
+            ctx.fillRect(cx2-tw*0.10, ty+th*0.55, tw*0.20, th*0.23);
+            ctx.fillRect(tx+tw*0.04,  ty+th*0.78, tw*0.92, th*0.04);
+            ctx.fillRect(tx,          ty+th*0.82, tw,      th*0.18);
+            ctx.restore();
+        })(28*ratio, 6*ratio, 50*ratio, 92*ratio);
+
+        // Header text: BARKASJOGJA.YK + line + PROPERTY  (dark text, no overlay)
+        const headerY = 54*ratio;
+        const fs = Math.round(37*ratio);
+        ctx.save();
+        ctx.fillStyle = '#1A1A1A'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+        ctx.font = `bold ${fs}px sans-serif`;
+        const startX = 86*ratio;
+        const barkasW = ctx.measureText('BARKAS').width;
+        ctx.fillText('BARKAS', startX, headerY);
+        const jogjaX = startX + barkasW, jogjaW = ctx.measureText('JOGJA').width;
+        ctx.fillText('JOGJA', jogjaX, headerY);
+        ctx.beginPath(); ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 2.5*ratio;
+        ctx.moveTo(jogjaX, headerY + fs*0.44); ctx.lineTo(jogjaX+jogjaW, headerY + fs*0.44); ctx.stroke();
+        const ykX = jogjaX + jogjaW, ykW = ctx.measureText('.YK').width;
+        ctx.fillText('.YK', ykX, headerY);
+        const propW = ctx.measureText('PROPERTY').width;
+        ctx.beginPath(); ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 2*ratio;
+        ctx.moveTo(ykX+ykW+18*ratio, headerY); ctx.lineTo(W-32*ratio-propW-16*ratio, headerY); ctx.stroke();
+        ctx.textAlign = 'right'; ctx.fillText('PROPERTY', W-32*ratio, headerY);
         ctx.restore();
 
         // Dark bottom section
         ctx.fillStyle = '#2D2D2D';
-        ctx.fillRect(0, DARK_Y, W, H - DARK_Y);
+        ctx.fillRect(0, DARK_Y, W, FOOTER_Y - DARK_Y);
 
-        // White card for text
-        const CARD_X=25*ratio, CARD_Y=DARK_Y+10*ratio, CARD_W=750*ratio, CARD_H=190*ratio, CR=14*ratio;
+        // White card — flush left, rounded right corners
+        const CARD_W = 790*ratio, CARD_H = FOOTER_Y - DARK_Y, CR = 22*ratio;
         ctx.save();
         ctx.beginPath();
-        ctx.moveTo(CARD_X+CR, CARD_Y); ctx.lineTo(CARD_X+CARD_W-CR, CARD_Y);
-        ctx.quadraticCurveTo(CARD_X+CARD_W, CARD_Y, CARD_X+CARD_W, CARD_Y+CR);
-        ctx.lineTo(CARD_X+CARD_W, CARD_Y+CARD_H-CR);
-        ctx.quadraticCurveTo(CARD_X+CARD_W, CARD_Y+CARD_H, CARD_X+CARD_W-CR, CARD_Y+CARD_H);
-        ctx.lineTo(CARD_X+CR, CARD_Y+CARD_H);
-        ctx.quadraticCurveTo(CARD_X, CARD_Y+CARD_H, CARD_X, CARD_Y+CARD_H-CR);
-        ctx.lineTo(CARD_X, CARD_Y+CR);
-        ctx.quadraticCurveTo(CARD_X, CARD_Y, CARD_X+CR, CARD_Y);
+        ctx.moveTo(0, DARK_Y); ctx.lineTo(CARD_W-CR, DARK_Y);
+        ctx.quadraticCurveTo(CARD_W, DARK_Y, CARD_W, DARK_Y+CR);
+        ctx.lineTo(CARD_W, DARK_Y+CARD_H-CR);
+        ctx.quadraticCurveTo(CARD_W, DARK_Y+CARD_H, CARD_W-CR, DARK_Y+CARD_H);
+        ctx.lineTo(0, DARK_Y+CARD_H);
         ctx.closePath(); ctx.fillStyle = '#FFFFFF'; ctx.fill();
         ctx.restore();
 
-        // Tombol kanan (Swipe Left + INFOKOS JOGJAYK)
+        // Orange buttons (right side, vertically centred)
         function drawBtn(bx, by, bw, bh, br, line1, line2) {
             ctx.save();
             ctx.beginPath();
@@ -1374,60 +1411,57 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
             ctx.lineTo(bx,by+br); ctx.quadraticCurveTo(bx,by,bx+br,by);
             ctx.closePath(); ctx.fillStyle = '#F5A623'; ctx.fill();
             ctx.fillStyle = '#1A1A1A'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            const fs1 = Math.round(22*ratio);
             if (line2) {
-                ctx.font = `bold ${fs1}px sans-serif`; ctx.fillText(line1, bx+bw/2, by+bh/2-12*ratio);
-                ctx.font = `bold ${Math.round(18*ratio)}px sans-serif`; ctx.fillText(line2, bx+bw/2, by+bh/2+12*ratio);
+                ctx.font = `bold ${Math.round(23*ratio)}px sans-serif`; ctx.fillText(line1, bx+bw/2, by+bh/2-13*ratio);
+                ctx.font = `bold ${Math.round(20*ratio)}px sans-serif`; ctx.fillText(line2, bx+bw/2, by+bh/2+13*ratio);
             } else {
-                ctx.font = `bold ${fs1}px sans-serif`; ctx.fillText(line1, bx+bw/2, by+bh/2);
+                ctx.font = `bold ${Math.round(23*ratio)}px sans-serif`; ctx.fillText(line1, bx+bw/2, by+bh/2);
             }
             ctx.restore();
         }
-        const BTN_X=800*ratio, BTN_W=255*ratio, BTN_H=88*ratio, BTN_R=12*ratio;
-        drawBtn(BTN_X, DARK_Y+8*ratio,  BTN_W, BTN_H, BTN_R, '<< Swipe Left');
-        drawBtn(BTN_X, DARK_Y+106*ratio, BTN_W, BTN_H, BTN_R, '🏠 INFOKOS', 'JOGJAYK');
+        const BTN_X=806*ratio, BTN_W=258*ratio, BTN_H=116*ratio, BTN_R=14*ratio, BTN_GAP=12*ratio;
+        const btnStartY = DARK_Y + (CARD_H - BTN_H*2 - BTN_GAP)/2;
+        drawBtn(BTN_X, btnStartY,             BTN_W, BTN_H, BTN_R, '<< Swipe Left', null);
+        drawBtn(BTN_X, btnStartY+BTN_H+BTN_GAP, BTN_W, BTN_H, BTN_R, '🏠 INFOKOS', 'JOGJAYK');
 
         // Footer
-        const FOOTER_Y = DARK_Y + 208*ratio;
-        ctx.fillStyle = '#F5A623';
-        ctx.fillRect(0, FOOTER_Y, W, H - FOOTER_Y);
-        ctx.fillStyle = '#1A1A1A';
-        ctx.font = `${Math.round(22*ratio)}px sans-serif`;
-        ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-        ctx.fillText('📱 085172115232   📷 @barkasjogja.yk   📷 @infokosjogja.yk', 35*ratio, FOOTER_Y + (H - FOOTER_Y)/2);
+        const ftGrad = ctx.createLinearGradient(0, FOOTER_Y, W, H);
+        ftGrad.addColorStop(0, '#F5B800'); ftGrad.addColorStop(1, '#F09200');
+        ctx.fillStyle = ftGrad; ctx.fillRect(0, FOOTER_Y, W, H-FOOTER_Y);
+        ctx.fillStyle = '#1A1A1A'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+        const ftMidY = FOOTER_Y + (H-FOOTER_Y)/2;
+        ctx.font = `${Math.round(24*ratio)}px sans-serif`;
+        ctx.fillText('📱 085172115232', 30*ratio, ftMidY);
+        ctx.fillText('📷 @barkasjogja.yk', 330*ratio, ftMidY);
+        ctx.fillText('📷 @infokosjogja.yk', 660*ratio, ftMidY);
 
-        // Preview teks di white card
-        const judul   = document.getElementById('infokos-judul')?.value || '';
-        const lokasi  = document.getElementById('infokos-lokasi')?.value || '';
+        // Text in white card (reads from DOM for editor preview)
+        const judul   = document.getElementById('infokos-judul')?.value   || '';
+        const lokasi  = document.getElementById('infokos-lokasi')?.value  || '';
         const harga   = parseInt(document.getElementById('infokos-harga')?.value) || 0;
-        const periode = document.getElementById('infokos-periode')?.value || '/bulan';
-        const TX = 50*ratio;
-
+        const periode = document.getElementById('infokos-periode')?.value  || '/bulan';
+        const TX = 48*ratio;
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
 
         if (judul) {
             let ts = Math.round(55*ratio);
             ctx.font = `bold ${ts}px sans-serif`;
             while (ctx.measureText(judul).width > 700*ratio && ts > 16) { ts--; ctx.font = `bold ${ts}px sans-serif`; }
-            ctx.fillStyle = '#1A1A1A';
-            ctx.fillText(judul, TX, CARD_Y + 55*ratio);
+            ctx.fillStyle = '#1A1A1A'; ctx.fillText(judul, TX, DARK_Y+65*ratio);
         }
         if (lokasi) {
             ctx.font = `${Math.round(36*ratio)}px sans-serif`;
-            ctx.fillStyle = '#444444';
-            ctx.fillText('📍 ' + lokasi, TX, CARD_Y + 108*ratio);
+            ctx.fillStyle = '#444444'; ctx.fillText('📍 '+lokasi, TX, DARK_Y+120*ratio);
         }
         if (harga) {
-            const hStr = 'Rp' + fmtRupiah(harga);
+            const hStr = 'Rp'+fmtRupiah(harga);
             let hs = Math.round(68*ratio);
             ctx.font = `bold ${hs}px sans-serif`;
-            while (ctx.measureText(hStr).width > 590*ratio && hs > 22) { hs--; ctx.font = `bold ${hs}px sans-serif`; }
-            ctx.fillStyle = '#1A1A1A';
-            ctx.fillText(hStr, TX, CARD_Y + 173*ratio);
+            while (ctx.measureText(hStr).width > 600*ratio && hs > 22) { hs--; ctx.font = `bold ${hs}px sans-serif`; }
+            ctx.fillStyle = '#1A1A1A'; ctx.fillText(hStr, TX, DARK_Y+198*ratio);
             const hW = ctx.measureText(hStr).width;
-            ctx.font = `${Math.round(30*ratio)}px sans-serif`;
-            ctx.fillStyle = '#555555';
-            ctx.fillText(periode, TX + hW + 7*ratio, CARD_Y + 165*ratio);
+            ctx.font = `${Math.round(32*ratio)}px sans-serif`;
+            ctx.fillStyle = '#555555'; ctx.fillText(periode, TX+hW+8*ratio, DARK_Y+190*ratio);
         }
     }
 
@@ -1443,10 +1477,11 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
         const ratio = dispW / 1080;
         const PX=95*ratio, PY=108*ratio, PW=890*ratio, PH=835*ratio;
 
-        // Background orange
+        // Background orange + hex pattern
         const bg = ctx.createLinearGradient(0, 0, dispW, dispH);
         bg.addColorStop(0, '#F5A623'); bg.addColorStop(1, '#C0460A');
         ctx.fillStyle = bg; ctx.fillRect(0, 0, dispW, dispH);
+        _drawInfokosHexPattern(ctx, dispW, dispH, ratio);
 
         if (twibbonImageSrc) {
             const prodImg = new Image();
@@ -1486,10 +1521,11 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
             const ctx = canvas.getContext('2d');
             const PX=95, PY=108, PW=890, PH=835;
 
-            // Background
+            // Background orange + hex pattern
             const bg = ctx.createLinearGradient(0, 0, W, H);
             bg.addColorStop(0, '#F5A623'); bg.addColorStop(1, '#C0460A');
             ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+            _drawInfokosHexPattern(ctx, W, H, 1);
 
             const scaleVal  = parseFloat(document.getElementById('infokos-img-scale')?.value  || 1);
             const offsetX   = parseFloat(document.getElementById('infokos-img-ox')?.value     || 0);
@@ -1512,88 +1548,99 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
 
                 // Frame overlay (1:1 scale, ratio=1)
                 const DARK_Y = PY + PH; // 943
+                const FOOTER_Y = DARK_Y + 268;
 
-                // Header
+                // Tugu silhouette
+                (function(tx,ty,tw,th){
+                    const cx2=tx+tw/2; ctx.save(); ctx.fillStyle='#1A1A1A';
+                    ctx.beginPath(); ctx.moveTo(cx2,ty); ctx.lineTo(cx2-tw*0.07,ty+th*0.08); ctx.lineTo(cx2+tw*0.07,ty+th*0.08); ctx.closePath(); ctx.fill();
+                    ctx.beginPath(); ctx.arc(cx2,ty+th*0.16,tw*0.14,0,Math.PI*2); ctx.fill();
+                    ctx.fillRect(cx2-tw*0.09,ty+th*0.24,tw*0.18,th*0.26);
+                    ctx.fillRect(cx2-tw*0.20,ty+th*0.50,tw*0.40,th*0.05);
+                    ctx.fillRect(cx2-tw*0.10,ty+th*0.55,tw*0.20,th*0.23);
+                    ctx.fillRect(tx+tw*0.04, ty+th*0.78,tw*0.92,th*0.04);
+                    ctx.fillRect(tx,         ty+th*0.82,tw,     th*0.18); ctx.restore();
+                })(28, 6, 50, 92);
+
+                // Header: dark text, BARKAS JOGJA(underlined) .YK + line + PROPERTY
                 ctx.save();
-                ctx.fillStyle = 'rgba(20,12,0,0.55)';
-                ctx.fillRect(0, 0, W, PY);
-                ctx.fillStyle = '#FFFFFF';
-                ctx.font = 'bold 42px sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-                ctx.fillText('BARKASJOGJA.YK', 62, 54);
-                ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 2.5;
-                ctx.beginPath(); ctx.moveTo(565, 54); ctx.lineTo(770, 54); ctx.stroke();
-                ctx.textAlign = 'right'; ctx.fillText('PROPERTY', W-55, 54);
+                ctx.fillStyle = '#1A1A1A'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+                ctx.font = 'bold 37px sans-serif';
+                const _sx=86, _bw=ctx.measureText('BARKAS').width;
+                ctx.fillText('BARKAS', _sx, 54);
+                const _jx=_sx+_bw, _jw=ctx.measureText('JOGJA').width;
+                ctx.fillText('JOGJA', _jx, 54);
+                ctx.beginPath(); ctx.strokeStyle='#1A1A1A'; ctx.lineWidth=2.5;
+                ctx.moveTo(_jx, 54+16); ctx.lineTo(_jx+_jw, 54+16); ctx.stroke();
+                const _yx=_jx+_jw, _yw=ctx.measureText('.YK').width;
+                ctx.fillText('.YK', _yx, 54);
+                const _pw=ctx.measureText('PROPERTY').width;
+                ctx.beginPath(); ctx.strokeStyle='#1A1A1A'; ctx.lineWidth=2;
+                ctx.moveTo(_yx+_yw+18, 54); ctx.lineTo(W-32-_pw-16, 54); ctx.stroke();
+                ctx.textAlign='right'; ctx.fillText('PROPERTY', W-32, 54);
                 ctx.restore();
 
-                // Dark bottom
-                ctx.fillStyle = '#2D2D2D'; ctx.fillRect(0, DARK_Y, W, H-DARK_Y);
+                // Dark bottom section
+                ctx.fillStyle = '#2D2D2D'; ctx.fillRect(0, DARK_Y, W, FOOTER_Y-DARK_Y);
 
-                // White card
-                const CARD_X=25, CARD_Y=DARK_Y+10, CARD_W=750, CARD_H=190, CR=14;
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(CARD_X+CR,CARD_Y); ctx.lineTo(CARD_X+CARD_W-CR,CARD_Y);
-                ctx.quadraticCurveTo(CARD_X+CARD_W,CARD_Y,CARD_X+CARD_W,CARD_Y+CR);
-                ctx.lineTo(CARD_X+CARD_W,CARD_Y+CARD_H-CR);
-                ctx.quadraticCurveTo(CARD_X+CARD_W,CARD_Y+CARD_H,CARD_X+CARD_W-CR,CARD_Y+CARD_H);
-                ctx.lineTo(CARD_X+CR,CARD_Y+CARD_H);
-                ctx.quadraticCurveTo(CARD_X,CARD_Y+CARD_H,CARD_X,CARD_Y+CARD_H-CR);
-                ctx.lineTo(CARD_X,CARD_Y+CR);
-                ctx.quadraticCurveTo(CARD_X,CARD_Y,CARD_X+CR,CARD_Y);
-                ctx.closePath(); ctx.fillStyle='#FFFFFF'; ctx.fill();
-                ctx.restore();
+                // White card (flush left, rounded right corners)
+                const _cw=790, _ch=FOOTER_Y-DARK_Y, _cr=22;
+                ctx.save(); ctx.beginPath();
+                ctx.moveTo(0,DARK_Y); ctx.lineTo(_cw-_cr,DARK_Y);
+                ctx.quadraticCurveTo(_cw,DARK_Y,_cw,DARK_Y+_cr);
+                ctx.lineTo(_cw,DARK_Y+_ch-_cr);
+                ctx.quadraticCurveTo(_cw,DARK_Y+_ch,_cw-_cr,DARK_Y+_ch);
+                ctx.lineTo(0,DARK_Y+_ch);
+                ctx.closePath(); ctx.fillStyle='#FFFFFF'; ctx.fill(); ctx.restore();
 
-                // Tombol kanan
-                function drawBtnFull(bx, by, bw, bh, br, line1, line2) {
-                    ctx.save();
-                    ctx.beginPath();
+                // Buttons
+                function drawBtnFull(bx,by,bw,bh,br,line1,line2) {
+                    ctx.save(); ctx.beginPath();
                     ctx.moveTo(bx+br,by); ctx.lineTo(bx+bw-br,by); ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+br);
                     ctx.lineTo(bx+bw,by+bh-br); ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-br,by+bh);
                     ctx.lineTo(bx+br,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-br);
                     ctx.lineTo(bx,by+br); ctx.quadraticCurveTo(bx,by,bx+br,by);
                     ctx.closePath(); ctx.fillStyle='#F5A623'; ctx.fill();
                     ctx.fillStyle='#1A1A1A'; ctx.textAlign='center'; ctx.textBaseline='middle';
-                    if (line2) {
-                        ctx.font='bold 26px sans-serif'; ctx.fillText(line1, bx+bw/2, by+bh/2-14);
-                        ctx.font='bold 22px sans-serif'; ctx.fillText(line2, bx+bw/2, by+bh/2+14);
-                    } else {
-                        ctx.font='bold 26px sans-serif'; ctx.fillText(line1, bx+bw/2, by+bh/2);
-                    }
+                    if (line2) { ctx.font='bold 26px sans-serif'; ctx.fillText(line1,bx+bw/2,by+bh/2-13); ctx.font='bold 22px sans-serif'; ctx.fillText(line2,bx+bw/2,by+bh/2+13); }
+                    else { ctx.font='bold 26px sans-serif'; ctx.fillText(line1,bx+bw/2,by+bh/2); }
                     ctx.restore();
                 }
-                drawBtnFull(800, DARK_Y+8,  255, 88, 12, '<< Swipe Left');
-                drawBtnFull(800, DARK_Y+106, 255, 88, 12, '🏠 INFOKOS', 'JOGJAYK');
+                const _bStartY = DARK_Y + (_ch - 116*2 - 12)/2;
+                drawBtnFull(806, _bStartY,       258, 116, 14, '<< Swipe Left', null);
+                drawBtnFull(806, _bStartY+116+12, 258, 116, 14, '🏠 INFOKOS', 'JOGJAYK');
 
                 // Footer
-                const FOOTER_Y = DARK_Y + 208;
-                ctx.fillStyle = '#F5A623'; ctx.fillRect(0, FOOTER_Y, W, H-FOOTER_Y);
-                ctx.fillStyle = '#1A1A1A'; ctx.font = '26px sans-serif';
-                ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-                ctx.fillText('📱 085172115232   📷 @barkasjogja.yk   📷 @infokosjogja.yk', 40, FOOTER_Y+(H-FOOTER_Y)/2);
+                const ftG = ctx.createLinearGradient(0,FOOTER_Y,W,H);
+                ftG.addColorStop(0,'#F5B800'); ftG.addColorStop(1,'#F09200');
+                ctx.fillStyle=ftG; ctx.fillRect(0,FOOTER_Y,W,H-FOOTER_Y);
+                ctx.fillStyle='#1A1A1A'; ctx.textBaseline='middle'; ctx.textAlign='left';
+                ctx.font='26px sans-serif';
+                const _ftY=FOOTER_Y+(H-FOOTER_Y)/2;
+                ctx.fillText('📱 085172115232', 30, _ftY);
+                ctx.fillText('📷 @barkasjogja.yk', 330, _ftY);
+                ctx.fillText('📷 @infokosjogja.yk', 660, _ftY);
 
-                // Teks di white card
-                const TX = 55;
+                // Text in card
+                const TX = 48;
                 ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-
                 if (judul) {
-                    let ts = 58;
-                    ctx.font = `bold ${ts}px sans-serif`;
+                    let ts = 58; ctx.font = `bold ${ts}px sans-serif`;
                     while (ctx.measureText(judul).width > 700 && ts > 16) { ts--; ctx.font = `bold ${ts}px sans-serif`; }
-                    ctx.fillStyle = '#1A1A1A'; ctx.fillText(judul, TX, CARD_Y+58);
+                    ctx.fillStyle = '#1A1A1A'; ctx.fillText(judul, TX, DARK_Y+65);
                 }
                 if (lokasi) {
                     ctx.font = '38px sans-serif'; ctx.fillStyle = '#444444';
-                    ctx.fillText('📍 ' + lokasi, TX, CARD_Y+110);
+                    ctx.fillText('📍 '+lokasi, TX, DARK_Y+120);
                 }
                 if (harga) {
-                    const hStr = 'Rp' + fmtRupiah(harga);
-                    let hs = 72;
-                    ctx.font = `bold ${hs}px sans-serif`;
-                    while (ctx.measureText(hStr).width > 590 && hs > 28) { hs--; ctx.font = `bold ${hs}px sans-serif`; }
-                    ctx.fillStyle = '#1A1A1A'; ctx.fillText(hStr, TX, CARD_Y+175);
+                    const hStr = 'Rp'+fmtRupiah(harga);
+                    let hs = 72; ctx.font = `bold ${hs}px sans-serif`;
+                    while (ctx.measureText(hStr).width > 600 && hs > 28) { hs--; ctx.font = `bold ${hs}px sans-serif`; }
+                    ctx.fillStyle = '#1A1A1A'; ctx.fillText(hStr, TX, DARK_Y+198);
                     const hW = ctx.measureText(hStr).width;
                     ctx.font = '34px sans-serif'; ctx.fillStyle = '#555555';
-                    ctx.fillText(periode, TX+hW+8, CARD_Y+167);
+                    ctx.fillText(periode, TX+hW+8, DARK_Y+190);
                 }
 
                 canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.92);
