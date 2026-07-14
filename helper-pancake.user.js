@@ -1326,17 +1326,20 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
     }
 
     function _drawInfokosHexPattern(ctx, W, H, ratio) {
-        const r = 30*ratio, hexH = Math.sqrt(3)*r, hexW = r*2;
+        // Flat-top hexagons (honeycomb), radius ~55px at 1080
+        const r = 55*ratio;
+        const colSpacing = r * 1.5;
+        const rowSpacing = r * Math.sqrt(3);
         ctx.save();
-        ctx.strokeStyle = 'rgba(0,0,0,0.14)';
-        ctx.lineWidth = 1.5*ratio;
-        for (let row = -1; row * hexH < H + hexH; row++) {
-            for (let col = -1; col * hexW * 0.75 < W + hexW; col++) {
-                const cx2 = col * hexW * 0.75;
-                const cy2 = row * hexH + (col % 2 === 0 ? 0 : hexH/2);
+        ctx.strokeStyle = 'rgba(0,0,0,0.20)';
+        ctx.lineWidth = 2*ratio;
+        for (let col = -1; col * colSpacing < W + r*2; col++) {
+            for (let row = -1; row * rowSpacing < H + rowSpacing; row++) {
+                const cx2 = col * colSpacing;
+                const cy2 = row * rowSpacing + (col % 2 !== 0 ? rowSpacing/2 : 0);
                 ctx.beginPath();
                 for (let i = 0; i < 6; i++) {
-                    const a = Math.PI/180*(60*i - 30);
+                    const a = (Math.PI / 3) * i; // flat-top: 0°,60°,120°...
                     const px2 = cx2 + r*Math.cos(a), py2 = cy2 + r*Math.sin(a);
                     i === 0 ? ctx.moveTo(px2, py2) : ctx.lineTo(px2, py2);
                 }
@@ -1344,6 +1347,70 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
             }
         }
         ctx.restore();
+    }
+
+    function _drawInfokosFooter(ctx, W, H, FOOTER_Y, ratio) {
+        // Footer bar gradient
+        const ftGrad = ctx.createLinearGradient(0, FOOTER_Y, W, H);
+        ftGrad.addColorStop(0, '#F5B800'); ftGrad.addColorStop(1, '#F09200');
+        ctx.fillStyle = ftGrad; ctx.fillRect(0, FOOTER_Y, W, H - FOOTER_Y);
+
+        const ftMidY = FOOTER_Y + (H - FOOTER_Y) / 2;
+        const iconR = 19*ratio;
+        const fs = Math.round(23*ratio);
+        ctx.font = `${fs}px sans-serif`;
+
+        // Draw WA circle icon + phone
+        function drawWAIcon(cx, cy, ir) {
+            ctx.save();
+            ctx.beginPath(); ctx.arc(cx, cy, ir, 0, Math.PI*2);
+            ctx.fillStyle = '#1A1A1A'; ctx.fill();
+            ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = ir*0.18; ctx.lineCap = 'round';
+            const s = ir * 0.48;
+            ctx.beginPath(); ctx.arc(cx - s*0.22, cy - s*0.25, s*0.46, Math.PI*0.85, Math.PI*1.75); ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx + s*0.22, cy + s*0.25, s*0.46, Math.PI*1.85, Math.PI*2.75); ctx.stroke();
+            ctx.restore();
+        }
+
+        // Draw camera circle icon
+        function drawCamIcon(cx, cy, ir) {
+            ctx.save();
+            ctx.beginPath(); ctx.arc(cx, cy, ir, 0, Math.PI*2);
+            ctx.fillStyle = '#1A1A1A'; ctx.fill();
+            const cw = ir*1.05, ch = ir*0.78, rx2 = cx-cw/2, ry2 = cy-ch/2+ir*0.05, rcr = ir*0.14;
+            ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = ir*0.14;
+            ctx.beginPath();
+            ctx.moveTo(rx2+rcr,ry2); ctx.lineTo(rx2+cw-rcr,ry2);
+            ctx.quadraticCurveTo(rx2+cw,ry2,rx2+cw,ry2+rcr);
+            ctx.lineTo(rx2+cw,ry2+ch-rcr); ctx.quadraticCurveTo(rx2+cw,ry2+ch,rx2+cw-rcr,ry2+ch);
+            ctx.lineTo(rx2+rcr,ry2+ch); ctx.quadraticCurveTo(rx2,ry2+ch,rx2,ry2+ch-rcr);
+            ctx.lineTo(rx2,ry2+rcr); ctx.quadraticCurveTo(rx2,ry2,rx2+rcr,ry2); ctx.closePath(); ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx, cy+ir*0.08, ir*0.27, 0, Math.PI*2); ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx+cw*0.33, ry2+ir*0.14, ir*0.09, 0, Math.PI*2);
+            ctx.fillStyle='#FFFFFF'; ctx.fill();
+            ctx.restore();
+        }
+
+        // Item 1: WA icon + nomor
+        const i1x = 30*ratio;
+        drawWAIcon(i1x + iconR, ftMidY, iconR);
+        ctx.fillStyle = '#1A1A1A'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+        ctx.fillText('085172115232', i1x + iconR*2 + 8*ratio, ftMidY);
+
+        // Item 2: cam icon + barkasjogja.yk
+        const i2x = 295*ratio;
+        drawCamIcon(i2x + iconR, ftMidY, iconR);
+        ctx.fillText('@barkasjogja.yk', i2x + iconR*2 + 8*ratio, ftMidY);
+
+        // Item 3: cam icon + infokosjogja.yk + trailing line
+        const i3x = 585*ratio;
+        drawCamIcon(i3x + iconR, ftMidY, iconR);
+        const t3 = '@infokosjogja.yk';
+        ctx.fillText(t3, i3x + iconR*2 + 8*ratio, ftMidY);
+        const t3w = ctx.measureText(t3).width;
+        const lineStartX = i3x + iconR*2 + 8*ratio + t3w + 18*ratio;
+        ctx.beginPath(); ctx.strokeStyle = '#1A1A1A'; ctx.lineWidth = 1.5*ratio;
+        ctx.moveTo(lineStartX, ftMidY); ctx.lineTo(W - 20*ratio, ftMidY); ctx.stroke();
     }
 
     function drawInfokosFrameOnCanvas(ctx, W, H, ratio) {
@@ -1425,15 +1492,7 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
         drawBtn(BTN_X, btnStartY+BTN_H+BTN_GAP, BTN_W, BTN_H, BTN_R, '🏠 INFOKOS', 'JOGJAYK');
 
         // Footer
-        const ftGrad = ctx.createLinearGradient(0, FOOTER_Y, W, H);
-        ftGrad.addColorStop(0, '#F5B800'); ftGrad.addColorStop(1, '#F09200');
-        ctx.fillStyle = ftGrad; ctx.fillRect(0, FOOTER_Y, W, H-FOOTER_Y);
-        ctx.fillStyle = '#1A1A1A'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-        const ftMidY = FOOTER_Y + (H-FOOTER_Y)/2;
-        ctx.font = `${Math.round(24*ratio)}px sans-serif`;
-        ctx.fillText('📱 085172115232', 30*ratio, ftMidY);
-        ctx.fillText('📷 @barkasjogja.yk', 330*ratio, ftMidY);
-        ctx.fillText('📷 @infokosjogja.yk', 660*ratio, ftMidY);
+        _drawInfokosFooter(ctx, W, H, FOOTER_Y, ratio);
 
         // Text in white card (reads from DOM for editor preview)
         const judul   = document.getElementById('infokos-judul')?.value   || '';
@@ -1611,15 +1670,7 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
                 drawBtnFull(806, _bStartY+116+12, 258, 116, 14, '🏠 INFOKOS', 'JOGJAYK');
 
                 // Footer
-                const ftG = ctx.createLinearGradient(0,FOOTER_Y,W,H);
-                ftG.addColorStop(0,'#F5B800'); ftG.addColorStop(1,'#F09200');
-                ctx.fillStyle=ftG; ctx.fillRect(0,FOOTER_Y,W,H-FOOTER_Y);
-                ctx.fillStyle='#1A1A1A'; ctx.textBaseline='middle'; ctx.textAlign='left';
-                ctx.font='26px sans-serif';
-                const _ftY=FOOTER_Y+(H-FOOTER_Y)/2;
-                ctx.fillText('📱 085172115232', 30, _ftY);
-                ctx.fillText('📷 @barkasjogja.yk', 330, _ftY);
-                ctx.fillText('📷 @infokosjogja.yk', 660, _ftY);
+                _drawInfokosFooter(ctx, W, H, FOOTER_Y, 1);
 
                 // Text in card
                 const TX = 48;
