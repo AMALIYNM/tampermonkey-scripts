@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Helper Pancake
 // @namespace    http://tampermonkey.net/
-// @version      4.9
+// @version      4.10
 // @description  Helper Pricing, Sensor, Forward ke Telegram, Twibbon Gadget & Motor, qris dinamis
 // @author       You
 // @updateURL    https://gist.githubusercontent.com/AMALIYNM/fffb6dc678e5298c6b76aaa2057de4bf/raw/helper-pancake.user.js
