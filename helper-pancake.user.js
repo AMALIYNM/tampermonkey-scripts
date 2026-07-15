@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Helper Pancake
 // @namespace    http://tampermonkey.net/
-// @version      4.10
+// @version      4.11
 // @description  Helper Pricing, Sensor, Forward ke Telegram, Twibbon Gadget & Motor, qris dinamis
 // @author       You
 // @updateURL    https://gist.githubusercontent.com/AMALIYNM/fffb6dc678e5298c6b76aaa2057de4bf/raw/helper-pancake.user.js
@@ -1375,16 +1375,17 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
         const ratio = dispW / 1080;
         const PX=110*ratio, PY=149*ratio, PW=859*ratio, PH=837*ratio;
 
+        const judul   = document.getElementById('infokos-judul')?.value   || '';
+        const lokasi  = document.getElementById('infokos-lokasi')?.value  || '';
+        const harga   = parseInt(document.getElementById('infokos-harga')?.value) || 0;
+        const periode = document.getElementById('infokos-periode')?.value  || '/bulan';
+
         _loadInfokosFrame().then(frameImg => {
-            ctx.clearRect(0, 0, dispW, dispH);
-            ctx.drawImage(frameImg, 0, 0, dispW, dispH);
-            const judul   = document.getElementById('infokos-judul')?.value   || '';
-            const lokasi  = document.getElementById('infokos-lokasi')?.value  || '';
-            const harga   = parseInt(document.getElementById('infokos-harga')?.value) || 0;
-            const periode = document.getElementById('infokos-periode')?.value  || '/bulan';
             if (twibbonImageSrc) {
                 const prodImg = new Image();
                 prodImg.onload = () => {
+                    ctx.clearRect(0, 0, dispW, dispH);
+                    ctx.drawImage(frameImg, 0, 0, dispW, dispH);
                     const baseScale = Math.max(PW/prodImg.naturalWidth, PH/prodImg.naturalHeight) * twibbonInfokosState.scale;
                     const dw=prodImg.naturalWidth*baseScale, dh=prodImg.naturalHeight*baseScale;
                     const dx=PX+(PW-dw)/2+twibbonInfokosState.ox*ratio;
@@ -1402,6 +1403,8 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
                 };
                 prodImg.src = twibbonImageSrc;
             } else {
+                ctx.clearRect(0, 0, dispW, dispH);
+                ctx.drawImage(frameImg, 0, 0, dispW, dispH);
                 _drawInfokosCardText(ctx, ratio, judul, lokasi, harga, periode);
             }
         });
