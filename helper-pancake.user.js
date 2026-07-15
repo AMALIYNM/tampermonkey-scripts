@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Helper Pancake
 // @namespace    http://tampermonkey.net/
-// @version      4.13
+// @version      4.14
 // @description  Helper Pricing, Sensor, Forward ke Telegram, Twibbon Gadget & Motor, qris dinamis
 // @author       You
 // @updateURL    https://gist.githubusercontent.com/AMALIYNM/fffb6dc678e5298c6b76aaa2057de4bf/raw/helper-pancake.user.js
@@ -1670,7 +1670,7 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
             const hStr = hargaMax
                 ? 'Rp'+fmtRupiah(hargaMin)+' - Rp'+fmtRupiah(hargaMax)
                 : 'Rp'+fmtRupiah(hargaMin);
-            let hs = Math.round(72*ratio);
+            let hs = Math.round(96*ratio);
             ctx.font = `bold ${hs}px sans-serif`;
             while (ctx.measureText(hStr).width > 860*ratio && hs > 18) { hs--; ctx.font = `bold ${hs}px sans-serif`; }
             ctx.fillStyle = '#1A1A1A'; ctx.fillText(hStr, TX, CARD_Y+165*ratio);
