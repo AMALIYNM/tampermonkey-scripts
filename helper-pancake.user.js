@@ -1338,28 +1338,28 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
     }
 
     function _drawInfokosCardText(ctx, ratio, judul, lokasi, harga, periode) {
-        const DARK_Y = (108+835)*ratio;
-        const TX = 48*ratio;
+        const CARD_Y = 1003*ratio; // white card starts at y=1003 in template
+        const TX = 55*ratio;
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
         if (judul) {
-            let ts = Math.round(55*ratio);
+            let ts = Math.round(52*ratio);
             ctx.font = `bold ${ts}px sans-serif`;
-            while (ctx.measureText(judul).width > 700*ratio && ts > 16) { ts--; ctx.font = `bold ${ts}px sans-serif`; }
-            ctx.fillStyle = '#1A1A1A'; ctx.fillText(judul, TX, DARK_Y+65*ratio);
+            while (ctx.measureText(judul).width > 680*ratio && ts > 16) { ts--; ctx.font = `bold ${ts}px sans-serif`; }
+            ctx.fillStyle = '#1A1A1A'; ctx.fillText(judul, TX, CARD_Y+65*ratio);
         }
         if (lokasi) {
-            ctx.font = `${Math.round(36*ratio)}px sans-serif`;
-            ctx.fillStyle = '#444444'; ctx.fillText('📍 '+lokasi, TX, DARK_Y+120*ratio);
+            ctx.font = `${Math.round(34*ratio)}px sans-serif`;
+            ctx.fillStyle = '#444444'; ctx.fillText('📍 '+lokasi, TX, CARD_Y+118*ratio);
         }
         if (harga) {
             const hStr = 'Rp'+fmtRupiah(harga);
-            let hs = Math.round(68*ratio);
+            let hs = Math.round(64*ratio);
             ctx.font = `bold ${hs}px sans-serif`;
-            while (ctx.measureText(hStr).width > 600*ratio && hs > 22) { hs--; ctx.font = `bold ${hs}px sans-serif`; }
-            ctx.fillStyle = '#1A1A1A'; ctx.fillText(hStr, TX, DARK_Y+198*ratio);
+            while (ctx.measureText(hStr).width > 580*ratio && hs > 22) { hs--; ctx.font = `bold ${hs}px sans-serif`; }
+            ctx.fillStyle = '#1A1A1A'; ctx.fillText(hStr, TX, CARD_Y+195*ratio);
             const hW = ctx.measureText(hStr).width;
-            ctx.font = `${Math.round(32*ratio)}px sans-serif`;
-            ctx.fillStyle = '#555555'; ctx.fillText(periode, TX+hW+8*ratio, DARK_Y+190*ratio);
+            ctx.font = `${Math.round(30*ratio)}px sans-serif`;
+            ctx.fillStyle = '#555555'; ctx.fillText(periode, TX+hW+8*ratio, CARD_Y+187*ratio);
         }
     }
 
@@ -1373,7 +1373,7 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
         canvas.style.height = dispH + 'px';
         const ctx = canvas.getContext('2d');
         const ratio = dispW / 1080;
-        const PX=95*ratio, PY=108*ratio, PW=890*ratio, PH=835*ratio;
+        const PX=110*ratio, PY=149*ratio, PW=859*ratio, PH=837*ratio;
 
         _loadInfokosFrame().then(frameImg => {
             ctx.clearRect(0, 0, dispW, dispH);
@@ -1415,7 +1415,7 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
             const canvas = document.createElement('canvas');
             canvas.width = W; canvas.height = H;
             const ctx = canvas.getContext('2d');
-            const PX=95, PY=108, PW=890, PH=835;
+            const PX=110, PY=149, PW=859, PH=837;
 
             const scaleVal  = parseFloat(document.getElementById('infokos-img-scale')?.value  || 1);
             const offsetX   = parseFloat(document.getElementById('infokos-img-ox')?.value     || 0);
