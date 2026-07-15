@@ -1339,7 +1339,7 @@ Silakan kak, berminat posting di akun yang mana? 😊`;
 
     function _drawInfokosCardText(ctx, ratio, judul, lokasi, harga, periode) {
         const CARD_Y = 1003*ratio; // white card starts at y=1003 in template
-        const TX = 55*ratio;
+        const TX = 90*ratio;
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
         if (judul) {
             let ts = Math.round(52*ratio);
